@@ -39,7 +39,7 @@ db = 'chlor.pickle'
 
 def learn_text(filename):
     with open(filename, 'r', encoding='utf-8') as fin:
-        return learn(fin.readlines())
+        return learn([fin.read()])
 
 def learn_csv(filename):
     return learn(chlor.messages(filename))
