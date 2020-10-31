@@ -35,8 +35,6 @@ def learn(strings):
             kv = markovify(kv, words)
     return kv
 
-db = 'chlor.pickle'
-
 def learn_text(filename):
     with open(filename, 'r', encoding='utf-8') as fin:
         return learn([fin.read()])
