@@ -17,11 +17,17 @@ def clean_word(s):
 def process(s):
     return map_filter(clean_word, re.split('\s+', s.strip().lower()))
 
-def markovify(kv, text):
-    fst, snd = tee(text)
-    next(snd)
+def pairs(it):
+    fst, snd = tee(it)
 
-    for (prev, curr) in zip(fst, snd):
+    try:
+        next(snd)
+        return zip(fst, snd)
+    except StopIteration:
+        return []
+
+def markovify(kv, sources):
+    for (prev, curr) in pairs(sources):
         if prev not in kv: kv[prev] = {}
         kv[prev][curr] = kv[prev].get(curr, 0) + 1
 

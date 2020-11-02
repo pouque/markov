@@ -18,6 +18,12 @@ size = (10, 30)
 # Разделитель слов для робота
 sep = ' '
 
+size     = lambda s: len(s.encode('utf-8'))
+nonempty = lambda xs: len(xs) > 0
+
+pop  = lambda xs: xs.pop(0)
+push = lambda xs, v: xs.insert(0, v)
+
 class IRC:
     irc = socket.socket()
   
@@ -28,8 +34,30 @@ class IRC:
         print("+ " + msg)
         self.irc.send("{}\n".format(msg).encode('utf-8'))
 
+    def prefix(self, chan):
+        return "PRIVMSG {} :".format(chan)
+
+    def split(self, msg, length):
+        buff, res, src = "", [], list(msg)
+
+        while nonempty(src):
+            while nonempty(src):
+                ch = pop(src)
+                if size(buff) + size(ch) <= length:
+                    buff += ch
+                else:
+                    push(src, ch)
+                    break
+
+            res.append(buff)
+            buff = ""
+
+        return res
+
     def send(self, chan, msg):
-        self.raw("PRIVMSG {} :{}".format(chan, msg))
+        prefix = self.prefix(chan)
+        for part in self.split(msg, 512 - len(prefix)):
+            self.raw(self.prefix(chan) + part)
 
     def connect(self, server, channel, botnick):
         print("Connecting to: " + server)
@@ -40,22 +68,30 @@ class IRC:
         self.raw("JOIN {}".format(channel))
 
     def get(self):
-        text = self.irc.recv(2040).decode('utf-8')
+        try:
+            text = self.irc.recv(2040).decode('utf-8')
 
-        if text.find('PING') != -1:                      
-            server = text.split()[1]
-            self.raw("PONG {}".format(server))
+            if text.find('PING') != -1:
+                server = text.split()[1]
+                self.raw("PONG {}".format(server))
 
-        return text
+            return text
+        except UnicodeDecodeError:
+            return ""
 
 kv = {}
 with open(db, 'rb') as fin:
     kv = pickle.load(fin)
 
 def find_start(answer):
-    for word in answer.lower().split():
-        if word in kv:
-            return word
+    words = answer.lower().split()
+
+    for word in words:
+        valid = filter(lambda key: word in key, kv.keys())
+        valid = list(valid)
+
+        if len(valid) > 0:
+            return random.choice(valid)
 
     return random.choice(list(kv.keys()))
 
