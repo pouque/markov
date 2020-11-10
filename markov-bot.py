@@ -2,6 +2,7 @@ import random
 import pickle
 import sys
 import irc
+import os
 
 # Ник, сервер, канал
 nickname = "markov"
@@ -10,37 +11,37 @@ channel = "#chlor"
 
 # Прегенерированные цепи в формате «ключевое слово — имя файла»
 files = {
-     'порно а в попку лучше': 'a-v-popku-luchshe.pickle',
-     'порно бисексуалы': 'biseksualy.pickle',
-     'порно ваши рассказы': 'vashi-rasskazy.pickle',
-     'порно гетеросексуалы': 'geteroseksualy.pickle',
-     'порно жено-мужчины': 'zheno-muzhchiny.pickle',
-     'порно зоофилы': 'zoofily.pickle',
-     'порно измена': 'izmena.pickle',
-     'порно классика': 'klassika.pickle',
-     'порно клизма': 'klizma.pickle',
-     'порно лесбиянки': 'lesbiyanki.pickle',
-     'порно миньет': 'minet.pickle',
-     'порно наблюдатели': 'nablyudateli.pickle',
-     'порно пи-пи': 'pi-pi.pickle',
-     'порно по принуждению': 'po-prinuzhdeniyu.pickle',
-     'порно потеря девственности': 'poterya-devstvennosti.pickle',
-     'порно поэзия': 'poeziya.pickle',
-     'порно пушистики': 'pushistiki.pickle',
-     'порно романтика': 'romantika.pickle',
-     'порно свингеры': 'svingery.pickle',
-     'порно служебный роман': 'sluzhebnyj-roman.pickle',
-     'порно случай': 'sluchaj.pickle',
-     'порно странности': 'strannosti.pickle',
-     'порно студенты': 'studenty.pickle',
-     'порно фантазии': 'fantazii.pickle',
-     'порно фетиш': 'fetish.pickle',
-     'порно фрагменты из запредельного': 'fragmenty-iz-zapredelnogo.pickle',
-     'порно эксклюзив': 'eksklyuziv.pickle',
-     'порно эротика': 'erotika.pickle',
-     'порно эротическая сказка': 'eroticheskaya-skazka.pickle',
-     'порно юмор': 'yumor.pickle',
-     'default': 'chlor.pickle'
+     'порно а в попку лучше': 'a-v-popku-luchshe',
+     'порно бисексуалы': 'biseksualy',
+     'порно ваши рассказы': 'vashi-rasskazy',
+     'порно гетеросексуалы': 'geteroseksualy',
+     'порно жено-мужчины': 'zheno-muzhchiny',
+     'порно зоофилы': 'zoofily',
+     'порно измена': 'izmena.',
+     'порно классика': 'klassika',
+     'порно клизма': 'klizma',
+     'порно лесбиянки': 'lesbiyanki',
+     'порно миньет': 'minet',
+     'порно наблюдатели': 'nablyudateli',
+     'порно пи-пи': 'pi-pi',
+     'порно по принуждению': 'po-prinuzhdeniyu',
+     'порно потеря девственности': 'poterya-devstvennosti',
+     'порно поэзия': 'poeziya',
+     'порно пушистики': 'pushistiki',
+     'порно романтика': 'romantika',
+     'порно свингеры': 'svingery',
+     'порно служебный роман': 'sluzhebnyj-roman',
+     'порно случай': 'sluchaj',
+     'порно странности': 'strannosti',
+     'порно студенты': 'studenty',
+     'порно фантазии': 'fantazii',
+     'порно фетиш': 'fetish',
+     'порно фрагменты из запредельного': 'fragmenty-iz-zapredelnogo',
+     'порно эксклюзив': 'eksklyuziv',
+     'порно эротика': 'erotika',
+     'порно эротическая сказка': 'eroticheskaya-skazka',
+     'порно юмор': 'yumor',
+     'default': 'chlor'
 }
 
 # Минимальный и максимальный размер (в словах) текста,
@@ -50,9 +51,17 @@ size = (10, 30)
 # Разделитель слов для робота
 sep = ' '
 
+def lookup(name, postfix):
+    filename = name + postfix
+
+    for root, dirs, files in os.walk("."):
+        if filename in files:
+            return os.path.join(root, filename)
+    raise FileNotFoundError(filename)
+
 chains = {}
-for keyword, filename in files.items():
-    with open(filename, 'rb') as fin:
+for keyword, name in files.items():
+    with open(lookup(name, ".pickle"), 'rb') as fin:
         chains[keyword] = pickle.load(fin)
 
 def select_chain(question):
