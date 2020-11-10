@@ -24,6 +24,7 @@ for keyword, filename in files.items():
         chains[keyword] = pickle.load(fin)
 
 def select_chain(question):
+    question = question.lower()
     for keyword, kv in chains.items():
         if keyword in question:
             return kv
