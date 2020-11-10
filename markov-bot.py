@@ -17,7 +17,7 @@ files = {
      'порно гетеросексуалы': 'geteroseksualy',
      'порно жено-мужчины': 'zheno-muzhchiny',
      'порно зоофилы': 'zoofily',
-     'порно измена': 'izmena.',
+     'порно измена': 'izmena',
      'порно классика': 'klassika',
      'порно клизма': 'klizma',
      'порно лесбиянки': 'lesbiyanki',
