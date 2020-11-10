@@ -8,8 +8,8 @@ nickname = "markov"
 server = "irc.freenode.net"
 channel = "#chlor"
 
-# .pickle-файл с прегенированными цепями
-db = 'chlor.pickle'
+# Прегенерированные цепи в формате «ключевое слово — имя файла»
+files = {'порн': 'porn.pickle', 'default': 'chlor.pickle'}
 
 # Минимальный и максимальный размер (в словах) текста,
 # который будет генерировать робот
@@ -18,14 +18,22 @@ size = (10, 30)
 # Разделитель слов для робота
 sep = ' '
 
-kv = {}
-with open(db, 'rb') as fin:
-    kv = pickle.load(fin)
+chains = {}
+for keyword, filename in files.items():
+    with open(filename, 'rb') as fin:
+        chains[keyword] = pickle.load(fin)
 
-def find_start(answer):
-    words = answer.lower().split()
+def select_chain(question):
+    for keyword, kv in chains.items():
+        if keyword in question:
+            return kv
+    return chains['default']
 
-    for word in words:
+def words(question):
+    return question.lower().split()
+
+def find_start(kv, question):
+    for word in words(question):
         valid = filter(lambda key: word in key, kv.keys())
         valid = list(valid)
 
@@ -34,10 +42,10 @@ def find_start(answer):
 
     return random.choice(list(kv.keys()))
 
-def gen(answer):
+def gen(kv, answer):
     length = random.randint(*size)
 
-    curr = find_start(answer)
+    curr = find_start(kv, answer)
     res = curr + sep
 
     for idx in range(length):
@@ -63,6 +71,6 @@ while True:
     if "PRIVMSG" in text and channel in text and nickname in text:
         try:
             msg = text.split("PRIVMSG " + channel)[1]
-            irc.send(channel, gen(msg))
+            irc.send(channel, gen(select_chain(msg), msg))
         except IndexError:
             pass
