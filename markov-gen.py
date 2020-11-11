@@ -1,21 +1,15 @@
-from itertools import tee
+from itertools import tee, zip_longest
 import random
 import pickle
 import chlor
 import sys
 import re
 
-def no_empty(lst):
-    return filter(bool, lst)
-
-def map_filter(f, lst):
-    return list(no_empty(map(f, lst)))
-
-def clean_word(s):
-    return s.lower().strip(',;«»-"()')
-
-def process(s):
-    return map_filter(clean_word, re.split('\s+', s.strip().lower()))
+no_empty   = lambda lst: filter(bool, lst)
+map_filter = lambda f, lst: list(no_empty(map(f, lst)))
+clean_word = lambda s: s.lower().strip(".?!…,;«»“”—–-:'\"()_")
+process    = lambda s: map_filter(clean_word, re.split('\s+', s.strip().lower()))
+join       = lambda xs: " ".join(xs)
 
 def pairs(it):
     fst, snd = tee(it)
@@ -26,6 +20,10 @@ def pairs(it):
     except StopIteration:
         return []
 
+def group(iterable, n, fillvalue=None):
+    args = [iter(iterable)] * n
+    return zip_longest(*args, fillvalue=fillvalue)
+
 def markovify(kv, sources):
     for (prev, curr) in pairs(sources):
         if prev not in kv: kv[prev] = {}
@@ -33,31 +31,34 @@ def markovify(kv, sources):
 
     return kv
 
-def learn(strings):
+def learn(chunk, strings):
     kv = {}
     for line in strings:
-        words = process(line)
-        if len(words) > 1:
+        words = map(join, group(process(line), chunk, fillvalue=""))
+        try:
             kv = markovify(kv, words)
+        except StopIteration:
+            pass
     return kv
 
-def learn_text(filename):
+def learn_text(chunk, filename):
     with open(filename, 'r', encoding='utf-8') as fin:
-        return learn([fin.read()])
+        return learn(chunk, [fin.read()])
 
-def learn_csv(filename):
-    return learn(chlor.messages(filename))
+def learn_csv(chunk, filename):
+    return learn(chunk, chlor.messages(filename))
 
 teachers = { "txt": learn_text, "csv": learn_csv }
 
 try:
-    _, input, mode, output = sys.argv
+    _, input, mode, output, chunk = sys.argv
 
     if mode not in ["txt", "csv"]:
         raise ValueError()
+    chunk = int(chunk)
 except ValueError:
-    print("Usage: {} input [txt|csv] output".format(sys.argv[0]))
+    print("Usage: {} input [txt|csv] output chunk-size".format(sys.argv[0]))
     sys.exit(-1)
 
 with open(output, 'wb') as fout:
-    pickle.dump(teachers[mode](input), fout)
+    pickle.dump(teachers[mode](chunk, input), fout)
