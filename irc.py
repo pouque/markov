@@ -25,7 +25,7 @@ class IRC:
         while nonempty(src):
             while nonempty(src):
                 ch = pop(src)
-                if size(buff) + size(ch) <= length:
+                if size(buff) + size(ch) < length:
                     buff += ch
                 else:
                     push(src, ch)
