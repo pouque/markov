@@ -38,7 +38,7 @@ class IRC:
 
     def send(self, chan, msg):
         prefix = self.prefix(chan)
-        for part in self.split(msg, 511 - len(prefix)):
+        for part in self.split(msg, 510 - len(prefix)):
             self.raw(self.prefix(chan) + part)
 
     def connect(self, server, channel, botnick):
