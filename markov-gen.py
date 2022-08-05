@@ -1,7 +1,7 @@
 from itertools import tee, zip_longest
+import traverse
 import random
 import pickle
-import chlor
 import sys
 import re
 
