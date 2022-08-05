@@ -16,6 +16,9 @@ class IRC:
         print("+ " + msg)
         self.irc.send("{}\n".format(msg).encode('utf-8'))
 
+    def join(self, channel):
+        self.raw("JOIN {}".format(channel))
+
     def prefix(self, chan):
         return "PRIVMSG {} :".format(chan)
 
@@ -47,7 +50,6 @@ class IRC:
 
         self.raw("USER {nick} {nick} {nick} :Markov".format(nick=botnick))
         self.raw("NICK {}".format(botnick))
-        self.raw("JOIN {}".format(channel))
 
     def get(self):
         try:

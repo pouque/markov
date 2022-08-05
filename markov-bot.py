@@ -6,8 +6,8 @@ import os
 
 # Ник, сервер, канал
 nickname = "markov"
-server = "irc.freenode.net"
-channel = "#lor"
+server = "irc.quakenet.org"
+channel = "#azaza"
 
 # Прегенерированные цепи в формате «ключевое слово — имя файла»
 files = {
@@ -74,11 +74,15 @@ def gen(kv, answer):
 irc = irc.IRC()
 irc.connect(server, channel, nickname)
 
+detector = "Welcome to the QuakeNet IRC Network"
 while True:
     text = irc.get().strip()
     if len(text) <= 0: continue
 
     print(text)
+
+    if detector in text:
+        irc.join(channel)
 
     if "PRIVMSG" in text and channel in text and nickname in text:
         try:
