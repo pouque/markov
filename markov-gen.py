@@ -46,7 +46,7 @@ def learn_text(chunk, filename):
         return learn(chunk, [fin.read()])
 
 def learn_csv(chunk, filename):
-    return learn(chunk, chlor.messages(filename))
+    return learn(chunk, traverse.messages(filename))
 
 teachers = { "txt": learn_text, "csv": learn_csv }
 
