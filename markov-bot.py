@@ -4,10 +4,11 @@ import sys
 import irc
 import os
 
-# Ник, сервер, канал
+# Ник, сервер, порт, канал
 nickname = "markov"
-server = "irc.quakenet.org"
-channel = "#azaza"
+server   = "irc.quakenet.org"
+port     = 6667
+channel  = "#azaza"
 
 # Прегенерированные цепи в формате «ключевое слово — имя файла»
 files = {
@@ -71,8 +72,8 @@ def gen(kv, answer):
 
     return res
 
-irc = irc.IRC()
-irc.connect(server, channel, nickname)
+irc = irc.IRC(ipv6 = False)
+irc.connect(server, channel, nickname, port = port)
 
 detector = "Welcome to the QuakeNet IRC Network"
 while True:

@@ -9,8 +9,10 @@ push = lambda xs, v: xs.insert(0, v)
 class IRC:
     irc = socket.socket()
   
-    def __init__(self):  
-        self.irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    def __init__(self, ipv6 = False):
+        self.family = socket.AF_INET6 if ipv6 else socket.AF_INET
+        self.irc    = socket.socket(self.family, socket.SOCK_STREAM)
+        self.alive  = False
 
     def raw(self, msg):
         print("+ " + msg)
@@ -44,12 +46,28 @@ class IRC:
         for part in self.split(msg, 510 - len(prefix)):
             self.raw(self.prefix(chan) + part)
 
-    def connect(self, server, channel, botnick):
-        print("Connecting to: " + server)
-        self.irc.connect((server, 6667))
+    def connect(self, server, channel, botnick, port = 6667):
+        addrs = socket.getaddrinfo(server, port, self.family, socket.SOCK_DGRAM, 0, socket.AI_PASSIVE)
+        for _, _, _, _, addr in addrs:
+            print("Connecting to: " + str(addr))
 
-        self.raw("USER {nick} {nick} {nick} :Markov".format(nick=botnick))
-        self.raw("NICK {}".format(botnick))
+            try:
+                self.irc.connect(addr)
+                self.alive = True
+                break
+            except socket.error as err:
+                print(f"FAIL: {err}")
+                continue
+
+        if not self.alive:
+            print("Unable to connect.")
+            return False
+
+        else:
+            self.raw("USER {nick} {nick} {nick} :Markov".format(nick=botnick))
+            self.raw("NICK {}".format(botnick))
+
+            return True
 
     def get(self):
         try:
